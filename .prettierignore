@@ -6,4 +6,5 @@ node_modules
 .output
 .env
 dist
+docs
 package-lock.json
