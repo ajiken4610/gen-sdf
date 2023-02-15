@@ -6,4 +6,7 @@ export default defineNuxtConfig({
       extends: "@tsconfig/strictest/tsconfig.json",
     },
   },
+  app: {
+    cdnURL: "/gen-sdf/",
+  },
 });
