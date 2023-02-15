@@ -37,6 +37,8 @@ onMounted(() => {
   canvas.height = 512
   // canvas.style.border = "solid"
   const ctx = canvas.getContext("2d")
+  ctx!.fillStyle = 'rgb( 0, 0, 0)';
+  ctx?.fillRect(0, 0, canvas.width, canvas.height);
   document.body.appendChild(canvas)
 })
 
