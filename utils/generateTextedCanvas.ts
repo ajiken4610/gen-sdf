@@ -70,7 +70,7 @@ export default (
     image.src = url;
     image.onload = () => {
       ctx?.drawImage(image, 0, 0);
-      (self.URL || self.webkitURL || self).revokeObjectURL(url);
+      // (self.URL || self.webkitURL || self).revokeObjectURL(url);
       resolve({ canvas, width: vw, height: vh });
     };
     const canvas = options.canvas || document.createElement("canvas");
