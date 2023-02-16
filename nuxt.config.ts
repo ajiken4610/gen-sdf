@@ -8,5 +8,6 @@ export default defineNuxtConfig({
   },
   app: {
     cdnURL: "/gen-sdf/",
+    baseURL: "/gen-sdf/",
   },
 });
