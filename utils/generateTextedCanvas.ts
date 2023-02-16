@@ -15,16 +15,32 @@ export default (
     options.maxWidth && (templateDiv.style.maxWidth = options.maxWidth + "px");
     templateDiv.style.background = "black";
     templateDiv.style.color = "white";
-    document.body.appendChild(templateDiv);
-    const vw = templateDiv.offsetWidth + 1;
-    const vh = templateDiv.offsetHeight;
-    document.body.removeChild(templateDiv);
+    templateDiv.style.fontFamily = "sans-serif";
+    templateDiv.style.lineHeight = "1.5em";
+    // templateDiv.style.letterSpacing = ".0875em";
+    // document.body.appendChild(templateDiv);
     const serializedHtml = serializer.serializeToString(templateDiv);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0, 0, ${vw}, ${vh}" width="${options.width}" height="${options.height}" preserveAspectRatio="none">
-      <foreignObject width="100%" height="100%">
+    let vw = options.width;
+    let vh = options.height;
+    const svgDiv = document.createElement("div");
+    svgDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0, 0, ${vw}, ${vh}" width="${options.width}" height="${options.height}" preserveAspectRatio="none">
+      <foreignObject width="100%">
         ${serializedHtml}
       </foreignObject>
     </svg>`;
+    const foreignElement = svgDiv.querySelector("svg > foreignObject > *")!;
+    document.body.appendChild(svgDiv);
+    const rect = foreignElement.getBoundingClientRect();
+    document.body.removeChild(svgDiv);
+    console.log(rect);
+    vw = rect.right - rect.left;
+    vh = rect.bottom - rect.top;
+    console.log(vw, vh);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0, 0, ${vw}, ${vh}" width="${options.width}" height="${options.height}" preserveAspectRatio="none">
+    <foreignObject width="100%" height="100%">
+      ${serializedHtml}
+    </foreignObject>
+  </svg>`;
     const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
     const url = (self.URL || self.webkitURL || self).createObjectURL(blob);
     const image = new Image();
@@ -37,7 +53,7 @@ export default (
     const canvas = options.canvas || document.createElement("canvas");
     canvas.width = options.width;
     canvas.height = options.height;
-    // canvas.style.border = "solid"
+    // canvas.style.border = "solid";
     const ctx = canvas.getContext("2d");
     ctx!.fillStyle = "rgb( 0, 0, 0)";
     ctx?.fillRect(0, 0, canvas.width, canvas.height);
