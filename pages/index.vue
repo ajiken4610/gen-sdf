@@ -201,8 +201,8 @@ bool aIsMinThanB(in vec2 aCoord,in vec4 a,in vec2 bCoord,in vec4 b){
   }
   vec2 aDist = unpackDistance(a.xy);
   vec2 bDist = unpackDistance(b.xy);
-  float aLen = length(aDist + aCoord);
-  float bLen = length(bDist + bCoord);
+  float aLen = length(aDist + aCoord * f);
+  float bLen = length(bDist + bCoord * f);
   if(aLen < bLen){
     return true;
   }else{
@@ -213,7 +213,7 @@ bool aIsMinThanB(in vec2 aCoord,in vec4 a,in vec2 bCoord,in vec4 b){
 void updateDatas(inout vec2 minCoord,inout vec4 minData,in float offsetX,in float offsetY){
   vec2 offset = addOffset(offsetX,offsetY);
   vec4 data = texture2D(map,offset);
-  if(!aIsMinThanB(minCoord,minData,offset,data)){
+  if(!aIsMinThanB(minCoord,minData,vec2(offsetX,offsetY),data)){
     minCoord = vec2(offsetX,offsetY);
     minData = data;
   }
