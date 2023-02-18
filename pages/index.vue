@@ -1,6 +1,7 @@
 <template lang="pug">
 div
-  input(v-model="inVal")
+  input(v-model="inValA")
+  input(v-model="inValB")
 </template>
 
 <script setup lang="ts">
@@ -14,12 +15,24 @@ onUnmounted(() => {
   renderer.dispose()
 })
 
-const sdfTarget = new WebGLRenderTarget(512, 512);
+const sdfTargetA = new WebGLRenderTarget(512, 512);
+const sdfTargetB = new WebGLRenderTarget(512, 512);
+onUnmounted(() => {
+  sdfTargetA.dispose()
+  sdfTargetB.dispose()
+})
 
-const inVal = ref("hello")
-watch(inVal, async () => {
-  const helloTex = new CanvasTexture((await generateTextedCanvas(inVal.value, { width: 512, height: 512, originalRatio: true })).canvas)
-  genSDF(renderer, sdfTarget, helloTex, 512, 512)
+const inValA = ref("hello")
+watch(inValA, async () => {
+  const helloTex = new CanvasTexture((await generateTextedCanvas(inValA.value, { width: 512, height: 512, originalRatio: true })).canvas)
+  genSDF(renderer, sdfTargetA, helloTex, 512, 512)
+  helloTex.dispose()
+}, { immediate: true })
+const inValB = ref("world")
+watch(inValB, async () => {
+  const worldTex = new CanvasTexture((await generateTextedCanvas(inValB.value, { width: 512, height: 512, originalRatio: true })).canvas)
+  genSDF(renderer, sdfTargetB, worldTex, 512, 512)
+  worldTex.dispose()
 }, { immediate: true })
 
 // init camera
@@ -39,20 +52,24 @@ void main(){
 }`,
   fragmentShader: `
 varying vec2 v_UV;
-uniform sampler2D sdf;
+uniform sampler2D sdf0;
+uniform sampler2D sdf1;
 uniform float t;
 float unpackDistance(in float packed){
   float normalized = (packed - .5) * 2.;
   return pow(2.,abs(normalized * 16.)) * sign(normalized);
 }
 void main(){
-  float data = texture2D(sdf,v_UV).r;
-  float unpacked = unpackDistance(data) / 32.;
-  float s = sin(t) / 2.;
-  gl_FragColor = vec4(vec3(smoothstep(-.1 + s,.1 + s,unpacked)),1.);
+  float dataA = texture2D(sdf0,v_UV).r;
+  float unpackedA = unpackDistance(dataA) / 32.;
+  float dataB = texture2D(sdf1,v_UV).r;
+  float unpackedB = unpackDistance(dataB) / 32.;
+  float s = sin(t)/2.+.5;
+  gl_FragColor = vec4(vec3(smoothstep(-.1,.1,mix(unpackedA,unpackedB,s))),1.);
 }`,
   uniforms: {
-    sdf: { value: sdfTarget.texture },
+    sdf0: { value: sdfTargetA.texture },
+    sdf1: { value: sdfTargetB.texture },
     t: { value: 0 }
   }
 });
