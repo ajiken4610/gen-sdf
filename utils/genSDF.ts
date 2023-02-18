@@ -149,7 +149,7 @@ varying vec2 v_UV;
 
 vec2 unpackDistance(in vec2 packed){
   vec2 normalized = (packed - .5) * 2.;
-  return pow(vec2(2.),abs(normalized * 16.)) * sign(normalized);
+  return (pow(vec2(2.),abs(normalized * 16.)) - 1.) * sign(normalized);
 }
 
 vec2 normalizeCoord(in vec2 raw){
@@ -235,7 +235,7 @@ uniform float h;
 varying vec2 v_UV;
 vec2 unpackDistance(in vec2 packed){
   vec2 normalized = (packed - .5) * 2.;
-  return pow(vec2(2.),abs(normalized * 16.)) * sign(normalized);
+  return (pow(vec2(2.),abs(normalized * 16.)) - 1.) * sign(normalized);
 }
 float normalizeLength(in float raw){
   float logged = log2(abs(raw) + 1.) * sign(raw) / 16.;

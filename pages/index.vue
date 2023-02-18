@@ -22,13 +22,13 @@ onUnmounted(() => {
   sdfTargetB.dispose()
 })
 
-const inValA = ref("hello")
+const inValA = ref("opqrs")
 watch(inValA, async () => {
   const helloTex = new CanvasTexture((await generateTextedCanvas(inValA.value, { width: 512, height: 512, originalRatio: true })).canvas)
   genSDF(renderer, sdfTargetA, helloTex, 512, 512)
   helloTex.dispose()
 }, { immediate: true })
-const inValB = ref("world")
+const inValB = ref("tuvwx")
 watch(inValB, async () => {
   const worldTex = new CanvasTexture((await generateTextedCanvas(inValB.value, { width: 512, height: 512, originalRatio: true })).canvas)
   genSDF(renderer, sdfTargetB, worldTex, 512, 512)
@@ -57,7 +57,7 @@ uniform sampler2D sdf1;
 uniform float t;
 float unpackDistance(in float packed){
   float normalized = (packed - .5) * 2.;
-  return pow(2.,abs(normalized * 16.)) * sign(normalized);
+  return (pow(2.,abs(normalized * 16.)) - 1.) * sign(normalized);
 }
 void main(){
   float dataA = texture2D(sdf0,v_UV).r;
@@ -65,7 +65,9 @@ void main(){
   float dataB = texture2D(sdf1,v_UV).r;
   float unpackedB = unpackDistance(dataB) / 32.;
   float s = sin(t)/2.+.5;
-  gl_FragColor = vec4(vec3(smoothstep(-.1,.1,mix(unpackedA,unpackedB,s))),1.);
+  gl_FragColor = vec4(vec3(smoothstep(-.05,.05,mix(unpackedA,unpackedB,s))),1.);
+  // gl_FragColor = vec4(vec3(mix(unpackedA,unpackedB,s))*32.,1.);
+  // gl_FragColor = vec4(dataA,dataA,dataA,1.);
 }`,
   uniforms: {
     sdf0: { value: sdfTargetA.texture },
