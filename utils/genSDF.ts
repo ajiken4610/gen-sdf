@@ -181,6 +181,9 @@ bool aIsMinThanB(in vec2 aCoord,in vec4 a,in vec2 bCoord,in vec4 b){
 
 void updateDatas(inout vec2 minCoord,inout vec4 minData,in float offsetX,in float offsetY){
   vec2 offset = addOffset(offsetX,offsetY);
+  if(0. > offset.x || 1. < offset.x || 0. > offset.y || 1. < offset.y){
+    return;
+  }
   vec4 data = texture2D(map,offset);
   if(!aIsMinThanB(minCoord,minData,vec2(offsetX,offsetY),data)){
     minCoord = vec2(offsetX,offsetY);
