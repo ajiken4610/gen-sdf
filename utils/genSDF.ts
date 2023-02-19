@@ -272,7 +272,7 @@ export default (renderer: WebGLRenderer, target: WebGLRenderTarget | null, sourc
   renderer.render(scene, camera);
   // step2
   plane.material = step2Shader;
-  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4));
+  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4)) + 1;
   for (var i = 0; i < loopCount; i++) {
     step2Shader.uniforms["map"]!.value = srcTarget.texture;
     step2Shader.uniforms["f"]!.value = 4 ** (i + 1);
