@@ -19,9 +19,7 @@ const scene = new Scene();
 const planeG = new PlaneGeometry(2, 2);
 const plane = new Mesh(planeG);
 scene.add(plane);
-// init framebuffer
-let srcTarget = new WebGLRenderTarget(512, 512);
-let dstTarget = new WebGLRenderTarget(512, 512);
+
 // init shaders
 const step1Shader = new ShaderMaterial({
   vertexShader: /* glsl */ `
@@ -129,8 +127,8 @@ void main(){
 }`,
   uniforms: {
     map: { value: null },
-    w: { value: 1 / 512 },
-    h: { value: 1 / 512 },
+    w: { value: null },
+    h: { value: null },
   },
 });
 const step2Shader = new ShaderMaterial({
@@ -215,8 +213,8 @@ void main(){
 `,
   uniforms: {
     map: { value: null },
-    w: { value: 1 / 512 },
-    h: { value: 1 / 512 },
+    w: { value: null },
+    h: { value: null },
     f: { value: null },
   },
 });
@@ -253,8 +251,8 @@ void main(){
   uniforms: {
     map: { value: null },
     tex: { value: null },
-    w: { value: 1 / 512 },
-    h: { value: 1 / 512 },
+    w: { value: null },
+    h: { value: null },
     f: { value: null },
   },
 });
@@ -270,6 +268,9 @@ export const genOCF = (
   step1Shader.uniforms["h"]!.value = 1 / h;
   step2Shader.uniforms["w"]!.value = 1 / w;
   step2Shader.uniforms["h"]!.value = 1 / h;
+  // init framebuffer
+  let srcTarget = new WebGLRenderTarget(w, h);
+  let dstTarget = new WebGLRenderTarget(w, h);
   // step1
   step1Shader.uniforms["map"]!.value = source;
   plane.material = step1Shader;
@@ -277,7 +278,7 @@ export const genOCF = (
   renderer.render(scene, camera);
   // step2
   plane.material = step2Shader;
-  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4));
+  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4)) + 1;
   for (var i = 0; i < loopCount; i++) {
     step2Shader.uniforms["map"]!.value = srcTarget.texture;
     step2Shader.uniforms["f"]!.value = 4 ** (i + 1);
@@ -287,6 +288,9 @@ export const genOCF = (
   }
   renderer.setRenderTarget(target);
   renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+  srcTarget.dispose();
+  dstTarget.dispose();
 };
 export const genSDF = (
   renderer: WebGLRenderer,
