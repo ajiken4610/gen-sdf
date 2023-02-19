@@ -258,13 +258,18 @@ void main(){
     f: { value: null },
   },
 });
-export default (renderer: WebGLRenderer, target: WebGLRenderTarget | null, source: Texture, w: number, h: number) => {
+// Outline Coordinate Field
+export const genOCF = (
+  renderer: WebGLRenderer,
+  target: WebGLRenderTarget | null,
+  source: Texture,
+  w: number,
+  h: number
+) => {
   step1Shader.uniforms["w"]!.value = 1 / w;
   step1Shader.uniforms["h"]!.value = 1 / h;
   step2Shader.uniforms["w"]!.value = 1 / w;
   step2Shader.uniforms["h"]!.value = 1 / h;
-  step3Shader.uniforms["w"]!.value = 1 / w;
-  step3Shader.uniforms["h"]!.value = 1 / h;
   // step1
   step1Shader.uniforms["map"]!.value = source;
   plane.material = step1Shader;
@@ -272,7 +277,7 @@ export default (renderer: WebGLRenderer, target: WebGLRenderTarget | null, sourc
   renderer.render(scene, camera);
   // step2
   plane.material = step2Shader;
-  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4)) + 1;
+  const loopCount = Math.ceil(Math.log(Math.max(w, h)) / Math.log(4));
   for (var i = 0; i < loopCount; i++) {
     step2Shader.uniforms["map"]!.value = srcTarget.texture;
     step2Shader.uniforms["f"]!.value = 4 ** (i + 1);
@@ -280,11 +285,26 @@ export default (renderer: WebGLRenderer, target: WebGLRenderTarget | null, sourc
     renderer.render(scene, camera);
     [srcTarget, dstTarget] = [dstTarget, srcTarget];
   }
+  renderer.setRenderTarget(target);
+  renderer.render(scene, camera);
+};
+export const genSDF = (
+  renderer: WebGLRenderer,
+  target: WebGLRenderTarget | null,
+  source: Texture,
+  w: number,
+  h: number
+) => {
+  const sdfTarget = new WebGLRenderTarget(w, h);
+  genOCF(renderer, sdfTarget, source, w, h);
+  step3Shader.uniforms["w"]!.value = 1 / w;
+  step3Shader.uniforms["h"]!.value = 1 / h;
   // step3
-  step3Shader.uniforms["map"]!.value = srcTarget.texture;
+  step3Shader.uniforms["map"]!.value = sdfTarget.texture;
   step3Shader.uniforms["tex"]!.value = source;
   plane.material = step3Shader;
   renderer.setRenderTarget(target);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
+  sdfTarget.dispose();
 };
